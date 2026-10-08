@@ -21,6 +21,7 @@ from modules.listenbrainz import ListenBrainz
 from modules.logger_utils import logger
 from modules.musicbrainz import MusicBrainz
 from modules.plex_library import PlexLibrary
+from modules.safety import PlaylistOnlySession
 from modules.sync import Syncer
 
 
@@ -62,7 +63,8 @@ def run_once(cfg, dry_run: bool, only_user: str | None) -> None:
     plex_cfg = cfg["plex"]
     plexapi.BASE_HEADERS["X-Plex-Client-Identifier"] = client_id(cfg["_dir"])
     plexapi.BASE_HEADERS["X-Plex-Product"] = "ListenBrainz Playlist Sync"
-    admin = PlexServer(plex_cfg["baseurl"], plex_cfg["token"], timeout=120)
+    # Every Plex request (including switched users, which reuse this session) goes through the guard.
+    admin = PlexServer(plex_cfg["baseurl"], plex_cfg["token"], session=PlaylistOnlySession(), timeout=120)
     section = admin.library.section(plex_cfg["music_section"])
 
     cache = Cache(os.path.join(cfg["_dir"], "cache.sqlite"))

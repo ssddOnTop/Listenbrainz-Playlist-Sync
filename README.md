@@ -23,8 +23,15 @@ in for the original. On top of that, every candidate goes through exclusion filt
 
 If several files match (e.g. the album and a compilation), the highest‑bitrate non‑excluded one wins.
 
-**It never downloads anything.** Its only writes are Plex playlists it created itself (marked `[lb-sync]` in
-the summary). It refuses to modify a playlist with the same name that it didn't create.
+**It never touches your music.** It never downloads anything, and:
+
+* The music folder is mounted **read-only** (`:ro`); files are only opened to read ISRC tags.
+* Every Plex request goes through a guard (`modules/safety.py`) that refuses any non-read request
+  outside `/playlists`, so tracks, albums, metadata, ratings, files and server settings cannot be
+  edited or deleted, even by a bug.
+* It only changes playlists it created itself (marked `[lb-sync]` in the summary) and refuses to modify
+  a playlist with the same name that it didn't create. Removing a track from a playlist never removes
+  it from the library.
 
 ## Setup
 
