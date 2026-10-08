@@ -55,12 +55,21 @@ class PlexLibrary:
             if not items or start >= total:
                 break
 
-    def load(self) -> None:
+    def _album_types(self) -> dict[int, set]:
+        """Album ratingKey -> Plex album types (Live, Remix, ...). Album listings don't include
+        subformats, so each type is queried through the section's `subformat` filter."""
         album_types: dict[int, set] = {}
-        for el in self._pages(9):
-            subformats = {s.attrib.get("tag", "") for s in el.findall("Subformat")}
-            if subformats:
-                album_types[int(el.attrib["ratingKey"])] = subformats
+        types = self.server.query(f"/library/sections/{self.section.key}/subformat", params={"type": 9})
+        for d in types:
+            key, title = d.attrib.get("key"), d.attrib.get("title", "")
+            if not key:
+                continue
+            for el in self._pages(9, {"subformat": key}):
+                album_types.setdefault(int(el.attrib["ratingKey"]), set()).add(title)
+        return album_types
+
+    def load(self) -> None:
+        album_types = self._album_types()
 
         for el in self._pages(10):
             media = el.find("Media")
