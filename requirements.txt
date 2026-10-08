@@ -1,6 +1,5 @@
 PyYAML~=6.0.1
 PlexAPI~=4.18.0
-colorama~=0.4.6
-requests~=2.31.0
-musicbrainzngs~=0.7.1
+requests~=2.32
 colorlog~=6.8.0
+mutagen~=1.47

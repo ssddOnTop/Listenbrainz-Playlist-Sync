@@ -1,30 +1,57 @@
-# Plex Info
-baseurl: 'YOUR_PLEX_URL' # Replace 'YOUR_PLEX_URL' with the URL for your server
-token: 'YOUR_TOKEN' # Replace 'YOUR_USER_TOKEN' with your Plex token
-music_section: 'YOUR_SECTION_NAME' # Replace 'YOUR_SECTION_NAME' with the name of your music section
-filter_genre: 'YOUR_GENRE' # OPTIONAL, replace 'YOUR_GENRE' with the genre you want to filter by (case-sensitive, one only).
-playlist_prefix: 'A_' # playlists are "Weekly Jams" and "Daily Jams". If you want to put something in front to make them "A_Weekly Jams" or whatever, put it here. Leave it blank (two quotes '' ) to not use a prefix
+# ---------------------------------------------------------------- Plex
+plex:
+  baseurl: 'http://192.168.1.70:32400'
+  # Token of the server OWNER (admin). Other users are handled via `plex_user` below.
+  token: 'YOUR_PLEX_ADMIN_TOKEN'
+  music_section: 'Music'
 
-# ListenBrainz Info
-user_token: 'YOUR_USER_TOKEN' # Replace 'YOUR_USER_TOKEN' with your actual ListenBrainz user token
-playlist_username: 'YOUR_USERNAME' # Replace 'YOUR_USERNAME' with the username of the user whose playlists you want to sync
-api_email: 'YOUR_EMAIL' # Replace with the email you want to use for the Musicbrainz API
-create_daily: False # Set to true if you want this ListenBrainz playlist to be synced
-create_weekly: True # Set to true if you want this ListenBrainz playlist to be synced
+  # ISRC fallback for tracks Plex has not matched to MusicBrainz.
+  #   unmatched (default) - read ISRC tags only from files Plex has no MusicBrainz id for
+  #   all                 - read every file
+  #   off                 - MusicBrainz ids only
+  # Needs the music folder mounted READ-ONLY into the container. Results are cached.
+  isrc_index: unmatched
+  # Plex's path prefix -> where the same folder is mounted in this container
+  path_map:
+    '/data': '/music'
 
-# Poster Info
-daily_poster: 'YOUR_FILE_PATH' # OPTIONAL, replace 'YOUR_FILE_PATH' with the filepath to a poster for the Daily playlist
-weekly_poster: 'YOUR_FILE_PATH' # OPTIONAL, replace 'YOUR_FILE_PATH' with the filepath to a poster for the Weekly playlist
+# Any contact (email/URL); MusicBrainz asks API clients to identify themselves.
+musicbrainz_contact: 'you@example.com'
+musicbrainz_cache_days: 30
 
-# This is a list of words that will be removed from titles when seraching
-filter_words: [
-    "original mix",
-    "radio edit",
-    "single edit",
-    "alternate mix",
-    "remastered",
-    "remaster",
-    "single version",
-    "retail mix",
-    "quartet"
-]
+# How often to re-sync with --loop / LOOP=1 (Daily Jams change daily, Weekly on Mondays).
+run_every_hours: 6
+
+# true = only log what would happen, never write to Plex.
+dry_run: false
+
+# Reject a match if the file's artist shares no word with the MusicBrainz artist.
+require_artist_match: true
+
+# ---------------------------------------------------------------- Users
+# One entry per person. Each person needs their own ListenBrainz account that receives their scrobbles.
+users:
+  - plex_user: null                 # null = the admin account (owner of the token above)
+    listenbrainz_username: 'your_lb_name'
+    listenbrainz_token: ''          # optional; only needed for private playlists
+    playlist_prefix: ''             # e.g. 'LB ' -> "LB Weekly Jams"
+    playlists: [weekly-jams, daily-jams, weekly-exploration]
+
+  # - plex_user: 'Darkbeast58'      # Plex Home / shared user (username, email or id)
+  #   listenbrainz_username: 'their_lb_name'
+  #   playlists: [weekly-jams]
+
+# ---------------------------------------------------------------- Exclusions
+# Applied to every playlist. A track is only added if it is the exact recording
+# ListenBrainz asked for AND passes these checks.
+filters:
+  exclude_covers: true          # MusicBrainz "cover" performances
+  exclude_remixes: true         # remixes, edits, DJ-mixes, mash-ups
+  exclude_live: true
+  exclude_karaoke: true
+  exclude_instrumental: false
+  exclude_album_types: [Live, Remix, DJ Mix]   # Plex album types
+  exclude_rating_at_or_below: 1                # stars; 0 disables
+  exclude_rating_keys: []                      # Plex ratingKeys to never add
+  # Extra regexes on track title/album (case-insensitive). Remove this key to use the defaults.
+  # exclude_title_patterns: ['\bremix(ed)?\b', '\bcover\b']

@@ -5,10 +5,13 @@ ENV PYTHONUNBUFFERED=1
 ENV CONFIG_PATH=/config/config.yml
 
 COPY requirements.txt requirements.txt
-RUN apk add --no-cache --virtual build-dependencies python3-dev gcc musl-dev && \
-    pip install -r requirements.txt && \
-    apk del build-dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY main.py ./
+COPY modules ./modules
+
+# Never runs as root; needs only /config (rw) and, optionally, the music folder read-only.
+RUN adduser -D -u 568 app
+USER 568
 
 CMD [ "python", "main.py" ]

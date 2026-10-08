@@ -1,0 +1,13 @@
+# Runs the sync every `run_every_hours` (see config.yml). Nothing here can modify your music:
+#   /config  - config.yml + cache (read/write)
+#   /music   - your library, READ-ONLY, only used to read ISRC tags (remove if isrc_index: off)
+services:
+  listenbrainz-sync:
+    build: .
+    container_name: listenbrainz-sync
+    restart: unless-stopped
+    environment:
+      LOOP: "1"
+    volumes:
+      - ./config:/config
+      - /mnt/store/music-hires:/music:ro
