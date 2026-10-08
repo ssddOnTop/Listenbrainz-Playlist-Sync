@@ -66,6 +66,12 @@ class FilterTests(unittest.TestCase):
         # The ORIGINAL has a backward 'remix' relation (it was remixed); it must stay.
         self.assertIsNone(self.f.recording_reason(rec("r", relations=[remixed_by])))
 
+    def test_edits_kept_by_default(self):
+        # Billie Jean's album/single version is an "edit" in MusicBrainz but is the original.
+        edit = {"type": "edit", "direction": "forward", "attributes": [], "target_type": "recording"}
+        self.assertIsNone(self.f.recording_reason(rec("r", relations=[perf(), edit])))
+        self.assertIsNotNone(Filters({"exclude_edits": True}).recording_reason(rec("r", relations=[edit])))
+
     def test_live_disambiguation(self):
         self.assertIsNotNone(self.f.recording_reason(rec("r", disambiguation="live, 1988-04-05: Mainz")))
 

@@ -15,6 +15,9 @@ DEFAULTS = {
     "exclude_live": True,
     "exclude_karaoke": True,
     "exclude_instrumental": False,
+    # Edits (radio/single/album edits) are the original artist's own recording, often the canonical
+    # version (e.g. Michael Jackson's "Billie Jean" album/single version), so they are kept by default.
+    "exclude_edits": False,
     "exclude_album_types": ["Live", "Remix", "DJ Mix"],
     "exclude_title_patterns": [
         r"\bremix(ed)?\b",
@@ -35,7 +38,7 @@ _PERFORMANCE_FLAGS = {
     "instrumental": "exclude_instrumental",
 }
 # Recording -> recording relationships where *this* recording is derived from another one
-_DERIVED_TYPES = {"remix", "edit", "DJ-mix", "mashes up", "compilation"}
+_DERIVED_TYPES = {"remix", "DJ-mix", "mashes up", "compilation"}
 
 
 class Filters:
@@ -53,13 +56,11 @@ class Filters:
                     key = _PERFORMANCE_FLAGS.get(attr)
                     if key and self.cfg[key]:
                         return f"MusicBrainz: {attr} performance"
-            if (
-                self.cfg["exclude_remixes"]
-                and rel["target_type"] == "recording"
-                and rel["type"] in _DERIVED_TYPES
-                and rel["direction"] == "forward"
-            ):
-                return f"MusicBrainz: {rel['type']} of another recording"
+            if rel["target_type"] == "recording" and rel["direction"] == "forward":
+                if self.cfg["exclude_remixes"] and rel["type"] in _DERIVED_TYPES:
+                    return f"MusicBrainz: {rel['type']} of another recording"
+                if self.cfg["exclude_edits"] and rel["type"] == "edit":
+                    return "MusicBrainz: edit of another recording"
         if self.cfg["exclude_live"] and rec.get("disambiguation", "").lower().startswith("live"):
             return "MusicBrainz: live recording"
         return None

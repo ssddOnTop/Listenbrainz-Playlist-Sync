@@ -46,7 +46,8 @@ users:
 # ListenBrainz asked for AND passes these checks.
 filters:
   exclude_covers: true          # MusicBrainz "cover" performances
-  exclude_remixes: true         # remixes, edits, DJ-mixes, mash-ups
+  exclude_remixes: true         # remixes, DJ-mixes, mash-ups
+  exclude_edits: false          # radio/single edits by the original artist are kept
   exclude_live: true
   exclude_karaoke: true
   exclude_instrumental: false

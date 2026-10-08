@@ -15,7 +15,7 @@ in for the original. On top of that, every candidate goes through exclusion filt
 
 | Layer | Rejects |
 |---|---|
-| MusicBrainz relationships | cover / live / karaoke (optionally instrumental) performances; remixes, edits, DJ‑mixes, mash‑ups |
+| MusicBrainz relationships | cover / live / karaoke (optionally instrumental) performances; remixes, DJ‑mixes, mash‑ups (edits optional) |
 | Plex album type | albums typed `Live`, `Remix`, `DJ Mix` (configurable) |
 | Title / album patterns | "remix", "cover", "karaoke", "- live", "sped up", ... (safety net) |
 | Your ratings | tracks the user rated ≤ 1★ (configurable) |
